@@ -1,0 +1,41 @@
+version: '3.3'
+
+services:
+
+  django:
+    container_name: django
+    build:
+      dockerfile: django.dockerfile
+      context: ./
+    volumes:
+      - ./:/code
+    command:
+      - bash
+      - -c
+      - |
+        env
+        python manage.py runserver 0.0.0.0:5000
+    ports:
+      - "5000:5000"
+
+  # migrations:
+  #   build:
+  #     dockerfile: django.dockerfile
+  #     context: ./
+  #   command:
+  #     - bash
+  #     - -c
+  #     - |
+  #       env
+  #       python manage.py makemigrations bitmex
+  #       python manage.py migrate
+
+  feeder:
+    container_name: feeder
+    volumes:
+      - ./:/code
+    build:
+      dockerfile: feeder.dockerfile
+      context: ./
+    links:
+      - django

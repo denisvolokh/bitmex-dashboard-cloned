@@ -1,0 +1,380 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+
+<script src="https://code.highcharts.com/stock/highstock.js"></script>
+
+<script language="javascript">
+  function round(value, decimals) {
+    return Number(Math.round(value+'e'+decimals)+'e-'+decimals);
+  };
+
+  var ws_url = 'ws://' + window.location.host + '/ws/ticks/';
+  var ticksSocket = new WebSocket(ws_url);
+
+  ticksSocket.onopen = function(e) {
+      console.log('on open', e);
+
+      ticksSocket.send(JSON.stringify({
+          subscribe: "XBTUSD"
+      }))
+
+      ticksSocket.send(JSON.stringify({
+          subscribe: "trade_volume_XBTUSD"
+      }))
+
+      ticksSocket.send(JSON.stringify({
+          subscribe: "volume1m_XBTUSD"
+      }))
+
+      ticksSocket.send(JSON.stringify({
+          subscribe: "volume5m_XBTUSD"
+      }))
+
+      ticksSocket.send(JSON.stringify({
+          subscribe: "instrument_XBTUSD"
+      }))
+  }
+
+  ticksSocket.onclose = function(e) {
+      console.log('on close', e);
+  }
+
+  ticksSocket.onerror = function(e) {
+      console.log('on error', e);
+  }
+
+  ticksSocket.onmessage = function(event) {
+      var data = JSON.parse(event.data);
+      //console.log('data', data);
+
+      if (data["type"] == "trade") {
+          // document.getElementById('trade').innerHTML = data["symbol"] + " " + data["side"] + " " + data["price"] + " " + data["size"];
+          document.getElementById('current_price').innerHTML = data["price"] + " USD";
+      }
+
+      if (data["type"] == "trade_volume_XBTUSD") {
+          document.getElementById('last_volumes').innerHTML = data["trade_volume"] + " USD";
+      }
+
+      if (data["type"] == "volume1m") {
+          document.getElementById('volume_change_1m').innerHTML = round(data["volume1m_change"], 2) + " USD (" + round(data["volume1m_change_percent"], 2) + "%)";
+      }
+
+      if (data["type"] == "volume5m") {
+          document.getElementById('volume_change_5m').innerHTML = round(data["volume5m_change"], 2) + " USD (" + round(data["volume5m_change_percent"], 2) + "%)";
+      }
+
+      if (data["type"] == "volume1h") {
+          document.getElementById('volume_change_1h').innerHTML = round(data["volume1h_change"], 2) + " USD (" + round(data["volume1h_change_percent"], 2) + "%)";
+      }
+
+      if (data["type"] == "volume1d") {
+          document.getElementById('volume_change_1d').innerHTML = round(data["volume1d_change"], 2) + " USD (" + round(data["volume1d_change_percent"], 2) + "%)";
+      }
+
+      if (data["type"] == "instrument") {
+          document.getElementById('open_interest').innerHTML = round(data["open_interest"], 2) + " USD";
+      }
+      
+  };
+
+  document.addEventListener('DOMContentLoaded', function () {
+      var myChart = Highcharts.chart('chart_container', {
+          chart: {
+              type: 'bar'
+          },
+          title: {
+              text: 'Fruit Consumption'
+          },
+          xAxis: {
+              categories: ['Apples', 'Bananas', 'Oranges']
+          },
+          yAxis: {
+              title: {
+                  text: 'Fruit eaten'
+              }
+          },
+          series: [{
+              name: 'Jane',
+              data: [1, 0, 4]
+          }, {
+              name: 'John',
+              data: [5, 7, 3]
+          }]
+      });
+  });
+
+</script>
+
+<style>
+  table.dashboard {
+    width: 60%;
+    text-align: right;
+    border-collapse: collapse;
+  }
+  table.dashboard td, table.dashboard th {
+    padding: 4px 4px;
+  }
+  table.dashboard tbody td {
+    font-size: 15px;
+  }
+  table.dashboard thead {
+      border-bottom: 0px solid #000000;
+  }
+  table.dashboard thead th {
+    font-size: 15px;
+    font-weight: bold;
+    color: #000000;
+    text-align: right;
+  }
+  table.dashboard tfoot {
+    font-size: 15px;
+    font-weight: bold;
+    color: #000000;
+    border-top: 1px solid #000000;
+  }
+  table.dashboard tfoot td {
+    font-size: 15px;
+  }
+</style>
+
+  <h1>BitMEX XBTUSD Dashboard</h1>
+
+  <br>
+
+  <table class="dashboard" id="price_table">
+    <thead>
+      <tr>
+        <th style="font-size: 30px" class="text-left">Live Data</th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td style="text-align: left;">Price</td>
+		    <td id="current_price" style="text-align: right;">waiting for first update</td>
+        <td id=""></td>
+        <td id=""></td>
+        <td id=""></td>
+        <td id=""></td>
+        <td id=""></td>
+      </tr>
+      <tr>
+        <td style="text-align: left;">Volume of last 5 trades</td>
+        <td id="last_volumes" style="text-align: right;">waiting for first update</td>
+        <td id=""></td>
+        <td id=""></td>
+        <td id=""></td>
+        <td id=""></td>
+        <td id=""></td>
+      </tr>
+      <tr style="border-bottom:1pt solid black;">
+        <td style="text-align: left;">Open Interest</td>
+        <td id="open_interest" style="text-align: right;">-</td>
+        <td id=""></td>
+        <td id=""></td>
+        <td id=""></td>
+        <td id=""></td>
+        <td id=""></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <br>
+
+  <table class="dashboard" id="funding_rate_table">
+    <thead>
+      <tr>
+        <th style="font-size: 30px" class="text-left">Funding Rate</th>
+        <th><a style="text-decoration:none" class="btn btn-primary" href="{% url "bitmex_dashboard" %}">update</a></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td style="text-align: left;">Current Funding Rate</td>
+		    <td id="current_funding_rate" style="text-align: right;">{{ current_funding_rate }}</td>
+        <td id=""></td>
+        <td id=""></td>
+        <td id=""></td>
+        <td id=""></td>
+        <td id=""></td>
+      </tr>
+      <tr>
+        <td style="text-align: left;">Predicted Funding Rate</td>
+		    <td id="predicted_funding_rate" style="text-align: right;">{{ predicted_funding_rate }}</td>
+        <td id=""></td>
+        <td id=""></td>
+        <td id=""></td>
+        <td id=""></td>
+        <td id=""></td>
+      </tr>
+      <tr style="border-bottom:1pt solid black;">
+        <td style="text-align: left;">Next Funding Rate Change at</td>
+		    <td id="next_funding_rate_change" style="text-align: right;">{{ next_funding_rate_change }}</td>
+        <td id=""></td>
+        <td id=""></td>
+        <td id=""></td>
+        <td id=""></td>
+        <td id=""></td>
+      </tr>
+    </tbody>
+  </table>
+
+<br>
+
+  <table class="dashboard" id="volume_table">
+    <thead>
+      <tr>
+        <th style="font-size: 30px" class="text-left">Volumes</th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td style="text-align: left;">1m USD Volume change</td>
+		<td id="volume_change_1m" style="text-align: right;">waiting for first update</td>
+        <td id=""></td>
+        <td id=""></td>
+        <td id=""></td>
+        <td id=""></td>
+        <td id=""></td>
+      </tr>
+      <tr>
+        <td style="text-align: left;">5m USD Volume change</td>
+		    <td id="volume_change_5m" style="text-align: right;">waiting for first update</td>
+        <td id=""></td>
+        <td id=""></td>
+        <td id=""></td>
+        <td id=""></td>
+        <td id=""></td>
+      </tr>
+      <tr>
+        <td style="text-align: left;">1h USD Volume change</td>
+		    <td id="volume_change_1h" style="text-align: right;">waiting for first update</td>
+        <td id=""></td>
+        <td id=""></td>
+        <td id=""></td>
+        <td id=""></td>
+        <td id=""></td>
+      </tr>
+      <tr style="border-bottom:1pt solid black;">
+        <td style="text-align: left;">1d USD Volume change</td>
+		    <td id="volume_change_1d" style="text-align: right;">waiting for first update</td>
+        <td id=""></td>
+        <td id=""></td>
+        <td id=""></td>
+        <td id=""></td>
+        <td id=""></td>
+      </tr>
+    </tbody>
+  </table>
+
+<br>
+
+  <table class="dashboard" id="support_resistance_table">
+    <thead>
+      <tr>
+        <th style="font-size: 30px" class="text-left">S/R Levels</th>
+        <th>
+          
+          <form class="form-inline" action="/action_page.php">
+            <select class="form-control" id="email">
+              <option>Timeframe - 1m</option>
+              <option>Timeframe - 5m</option>
+              <option>Timeframe - 15m</option>
+              <option>Timeframe - 30m</option>
+              <option>Timeframe - 1h</option>
+              <option>Timeframe - 3h</option>
+              <option>Timeframe - 6h</option>
+              <option>Timeframe - 12h</option>
+              <option>Timeframe - 1d</option>
+              <option>Timeframe - 1w</option>
+              <option>Timeframe - 1M</option>
+            </select>
+            <input type="text" class="form-control" id="candles" placeholder='Candles'>
+            <button type="submit" class="btn btn-primary">Update</button>
+          </form>
+        </th>
+        <!-- <th><a style="text-decoration:none" class="btn btn-primary" href="{% url "bitmex_dashboard" %}">update</a></th> -->
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td style="text-align: left;">R2</td>
+        <td id="resistance_2" style="text-align: right;"></td>
+        <td id="">{{ R2 }}</td>
+        <td id=""></td>
+        <td id=""></td>
+        <td id=""></td>
+        <td id=""></td>
+      </tr>
+      <tr>
+        <td style="text-align: left;">R1</td>
+        <td id="resistance_1" style="text-align: right;"></td>
+        <td id="">{{ R1 }}</td>
+        <td id=""></td>
+        <td id=""></td>
+        <td id=""></td>
+        <td id=""></td>
+      </tr>
+      <tr>
+        <td style="text-align: left;">S1</td>
+        <td id="support_1" style="text-align: right;"></td>
+        <td id="">{{ S1 }}</td>
+        <td id=""></td>
+        <td id=""></td>
+        <td id=""></td>
+        <td id=""></td>
+      </tr>
+      <tr style="border-bottom:1pt solid black;">
+        <td style="text-align: left;">S2</td>
+		    <td id="support_2" style="text-align: right;"></td>
+        <td id="">{{ S2 }}</td>
+        <td id=""></td>
+        <td id=""></td>
+        <td id=""></td>
+        <td id=""></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div id="chart_container" style="width:688px; height:500px;"></div>
+
+<script>
+// update crypto/fiat rates
+// function myTimerFundingRates() {
+//   $.getJSON('update_funding_rates',
+//         function (data) {
+//             var json = data['rates'];
+//             document.getElementById('current_funding_rate').innerHTML = json[0];
+//             document.getElementById('predicted_funding_rate').innerHTML = json[1];
+//             document.getElementById('next_funding_rate_change').innerHTML = json[2];
+//         });
+// }
+// myTimerFundingRates();
+// var myVar = setInterval(myTimerFundingRates, 60000);
+// delete the rate update timer
+// clearInterval(myTimerFundingRates);
+</script>
+
+{% endblock %}

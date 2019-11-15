@@ -1,0 +1,72 @@
+{% extends "base_generic.html" %}
+
+{% block content %}
+
+<script language="javascript">
+    var ws_url = 'ws://' + window.location.host + '/ws/ticks/';
+    var ticksSocket = new WebSocket(ws_url);
+
+    ticksSocket.onopen = function(e) {
+        console.log('on open', e);
+
+        ticksSocket.send(JSON.stringify({
+            subscribe: "XBTUSD"
+        }))
+
+        ticksSocket.send(JSON.stringify({
+            subscribe: "trade_volume_XBTUSD"
+        }))
+
+        ticksSocket.send(JSON.stringify({
+            subscribe: "volume1m_XBTUSD"
+        }))
+
+        ticksSocket.send(JSON.stringify({
+            subscribe: "volume5m_XBTUSD"
+        }))
+    }
+
+    ticksSocket.onclose = function(e) {
+        console.log('on close', e);
+    }
+
+    ticksSocket.onerror = function(e) {
+        console.log('on error', e);
+    }
+
+    ticksSocket.onmessage = function(event) {
+        var data = JSON.parse(event.data);
+        console.log('data', data);
+        
+        if (data["type"] == "trade_volume_XBTUSD") {
+            document.getElementById('trade_volume').innerHTML = data["trade_volume"]
+        }
+
+        if (data["type"] == "trade") {
+            document.getElementById('trade').innerHTML = data["symbol"] + " " + data["side"] + " " + data["price"] + " " + data["size"]
+        }
+
+        if (data["type"] == "volume1m") {
+            document.getElementById('volume1m').innerHTML = data["volume1m"]
+        }
+
+        if (data["type"] == "volume5m") {
+            document.getElementById('volume5m').innerHTML = data["volume5m"]
+        }
+        
+    };
+</script>
+
+<span>Current Trade:</span>
+<span id="trade">Waiting for trade ...</span>
+<br/>
+<span>Volume (sum of 5 latest trades):</span>
+<span id="trade_volume">Waiting for trade volume...</span>
+<br/>
+<span>1m volume change (%):</span>
+<span id="volume1m">Waiting for volume change...</span>
+<br/>
+<span>5m volume change (%):</span>
+<span id="volume5m">Waiting for volume change...</span>
+
+{% endblock %}

@@ -1,0 +1,33 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+jupyter = "*"
+
+[packages]
+django = "==2.0"
+channels = "*"
+requests = "*"
+pyyaml = "==3.13"
+websocket-client = "*"
+python-dotenv = "*"
+ccxt = "*"
+pandas = "*"
+numpy = "*"
+plotly = "*"
+mpl-finance = "*"
+django-restframework = "*"
+djangorestframework = "*"
+django-filter = "*"
+django-cors-headers = "*"
+django-cron = "*"
+django-crontab = "*"
+django-celery = "==3.2.2"
+redis = "==2.10.6"
+django-extensions = "*"
+channels-redis = "*"
+
+[requires]
+python_version = "3.7"

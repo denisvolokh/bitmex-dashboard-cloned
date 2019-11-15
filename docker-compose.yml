@@ -1,0 +1,64 @@
+version: '3.3'
+
+services:
+
+  redis:
+    image: 'redis:latest'
+    ports:
+      - 6379:6379
+
+  celery:
+    container_name: celery
+    build:
+      dockerfile: celery.dockerfile
+      context: ./
+    volumes:
+      - ./:/code
+    environment:
+      - C_FORCE_ROOT=true
+    command:
+      - bash
+      - -c
+      - |
+        rm celerybeat.pid
+        python manage.py celery worker --loglevel=DEBUG -B
+    depends_on:
+      - redis
+    links:
+      - redis
+
+  webapp:
+    container_name: webapp
+    build:
+      dockerfile: webapp.dockerfile
+      context: ./
+    volumes:
+      - ./webapp/:/code
+    ports: 
+      - "3000:3000"
+
+  django:
+    container_name: django
+    build:
+      dockerfile: django.dockerfile
+      context: ./
+    volumes:
+      - ./:/code
+    command:
+      - bash
+      - -c
+      - |
+        env
+        python manage.py runserver 0.0.0.0:5000
+    ports:
+      - "5000:5000"
+
+  feeder:
+    container_name: feeder
+    volumes:
+      - ./:/code
+    build:
+      dockerfile: feeder.dockerfile
+      context: ./
+    links:
+      - django

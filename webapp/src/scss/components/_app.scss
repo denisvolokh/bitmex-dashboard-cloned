@@ -1,0 +1,18 @@
+.app {
+  min-height: 100vh;
+  padding: 24px;
+  @include flex-col(stretch, center);
+  &__container {
+    width: 100%;
+    @include media {
+      min-width: 800px;
+      max-width: 50%;
+    }
+  }
+  &__title {
+    font-size: 28px;
+  }
+  &__section {
+    margin-bottom: 16px;
+  }
+}

@@ -1,0 +1,17 @@
+%layer {
+  position: absolute;
+  @include position;
+}
+
+%input {
+  height: 28px;
+  border: 1px solid #ccc;
+  padding: 1px 4px 0 4px;
+  text-align: right;
+  border-radius: 4px;
+  width: 100%;
+  max-width: 140px;
+  &:active {
+    border-radius: 4px;
+  }
+}

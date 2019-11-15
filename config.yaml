@@ -1,0 +1,8 @@
+symbol: 'XBTUSD'
+keep_trades: 5
+
+api_sleep: 1
+
+# BitMEX PROD
+rest_api_base_url: 'https://www.bitmex.com/api/v1'
+ws_api_base_url: 'wss://www.bitmex.com'
