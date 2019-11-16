@@ -98,7 +98,7 @@ CHANNEL_LAYERS = {
         # "BACKEND": "channels.layers.InMemoryChannelLayer",
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
         'CONFIG': {
-            "hosts": ["redis://Nzn%12A6VonK5SAUo*p$ND9nmwJTiFu3wKI@redis/"],
+            "hosts": ["redis://:s3cr3t_i23_567@redis/"],
         },
     },
 }
@@ -155,7 +155,7 @@ STATIC_URL = '/static/'
 import djcelery
 djcelery.setup_loader()
 
-BROKER_URL = "redis://:Nzn%12A6VonK5SAUo*p$ND9nmwJTiFu3wKI@redis/"
+BROKER_URL = "redis://:s3cr3t_i23_567@redis/"
 CELERY_IMPORTS = ("bitmex.tasks")
 
 from celery.schedules import crontab

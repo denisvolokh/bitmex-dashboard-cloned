@@ -4,7 +4,7 @@ services:
 
   redis:
     image: 'redis:4-alpine'
-    command: redis-server --requirepass Nzn%12A6VonK5SAUo*p$ND9nmwJTiFu3wKI
+    command: redis-server --requirepass s3cr3t_i23_567
     ports:
       - 6379:6379
 
