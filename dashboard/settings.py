@@ -155,7 +155,7 @@ STATIC_URL = '/static/'
 import djcelery
 djcelery.setup_loader()
 
-BROKER_URL = "redis://Nzn%12A6VonK5SAUo*p$ND9nmwJTiFu3wKI@redis/"
+BROKER_URL = "redis://:Nzn%12A6VonK5SAUo*p$ND9nmwJTiFu3wKI@redis/"
 CELERY_IMPORTS = ("bitmex.tasks")
 
 from celery.schedules import crontab
